@@ -10,8 +10,8 @@ import (
 )
 
 type Client struct {
-	Config  *Config
-	Elem *Elem
+	Config *Config
+	Elem   *Elem
 }
 
 func (rec *Client) Init(config *Config, metaList ...interface{}) {
@@ -186,11 +186,11 @@ func (rec *Client) A(value interface{}) string {
 		str = rec.Config.JsonEncode.Replace(str)
 		switch any.(type) {
 		case
-				bool,
-				complex64, complex128,
-				float32, float64,
-				int, int8, int16, int32, int64,
-				uint, uint8, uint16, uint32, uint64:
+			bool,
+			complex64, complex128,
+			float32, float64,
+			int, int8, int16, int32, int64,
+			uint, uint8, uint16, uint32, uint64:
 		default:
 			str = fmt.Sprintf("\"%v\"", str)
 		}

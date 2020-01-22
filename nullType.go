@@ -25,7 +25,7 @@ func (rec *NullBool) Set(value bool) {
 	rec.Valid = true
 }
 
-func (rec *NullBool) Delete()  {
+func (rec *NullBool) Delete() {
 	var val bool
 	rec.Value = val
 	rec.Valid = false
@@ -78,7 +78,7 @@ func (rec *NullFloat64) Set(value float64) {
 	rec.Valid = true
 }
 
-func (rec *NullFloat64) Delete()  {
+func (rec *NullFloat64) Delete() {
 	var val float64
 	rec.Value = val
 	rec.Valid = false
@@ -131,7 +131,7 @@ func (rec *NullInt32) Set(value int) {
 	rec.Valid = true
 }
 
-func (rec *NullInt32) Delete()  {
+func (rec *NullInt32) Delete() {
 	var val int
 	rec.Value = int32(val)
 	rec.Valid = false
@@ -184,7 +184,7 @@ func (rec *NullInt64) Set(value int) {
 	rec.Valid = true
 }
 
-func (rec *NullInt64) Delete()  {
+func (rec *NullInt64) Delete() {
 	var val int
 	rec.Value = int64(val)
 	rec.Valid = false
@@ -237,7 +237,7 @@ func (rec *NullString) Set(value string) {
 	rec.Valid = true
 }
 
-func (rec *NullString) Delete()  {
+func (rec *NullString) Delete() {
 	var val string
 	rec.Value = val
 	rec.Valid = false
@@ -290,7 +290,7 @@ func (rec *NullTime) Set(value time.Time) {
 	rec.Valid = true
 }
 
-func (rec *NullTime) Delete()  {
+func (rec *NullTime) Delete() {
 	var val time.Time
 	rec.Value = val
 	rec.Valid = false

@@ -368,11 +368,11 @@ func (rec *Build) SetData() error {
 			if any != nil {
 				switch any.(type) {
 				case
-						bool,
-						complex64, complex128,
-						float32, float64,
-						int, int8, int16, int32, int64,
-						uint, uint8, uint16, uint32, uint64:
+					bool,
+					complex64, complex128,
+					float32, float64,
+					int, int8, int16, int32, int64,
+					uint, uint8, uint16, uint32, uint64:
 				default:
 					str = fmt.Sprintf("\"%v\"", str)
 				}

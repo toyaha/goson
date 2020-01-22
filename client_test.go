@@ -6,7 +6,7 @@ import (
 )
 
 var ClientTestIdx struct {
-	Id int `json:"id"`
+	Id   int    `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -296,8 +296,8 @@ func TestClient_S(t *testing.T) {
 		target := gs.S(1)
 		check := "\"1\""
 		if target != check {
-			 t.Error("target:", target)
-			 t.Error("check :", check)
+			t.Error("target:", target)
+			t.Error("check :", check)
 		}
 	})
 
@@ -337,7 +337,7 @@ func TestClient_V(t *testing.T) {
 		gs := goson.NewClientDefault()
 		target := gs.V("abc")
 		check := "abc"
-		 if target != check {
+		if target != check {
 			t.Error("target:", target)
 			t.Error("check :", check)
 		}

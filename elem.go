@@ -3,7 +3,7 @@ package goson
 import "errors"
 
 type ElemDataValue struct {
-	Value   interface{}
+	Value interface{}
 }
 
 type ElemData struct {
