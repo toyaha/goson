@@ -6,16 +6,13 @@ import (
 )
 
 const (
-	DataModeRoot         = "root"
-	DataModeKey          = "key"
-	DataModeKeyFormat    = "keyFormat"
-	DataModeAuto         = "auto"
-	DataModeString       = "string"
-	DataModeStringFormat = "stringFormat"
-	DataModeValue        = "value"
-	DataModeValueFormat  = "valueFormat"
-	DataModeArray        = "array"
-	DataModeMap          = "map"
+	DataModeRoot   = "root"
+	DataModeKey    = "key"
+	DataModeAuto   = "auto"
+	DataModeString = "string"
+	DataModeValue  = "value"
+	DataModeArray  = "array"
+	DataModeMap    = "map"
 
 	StructFieldTagDefault = "json"
 

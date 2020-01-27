@@ -104,31 +104,23 @@ func (rec *Client) SetMeta(metaList ...interface{}) {
 	}
 }
 
-func (rec *Client) SetKey(parent *int, key interface{}) int {
-	return rec.Elem.SetData(DataModeKey, parent, key)
+func (rec *Client) SetKey(parent *int, valueList ...interface{}) int {
+	return rec.Elem.SetData(DataModeKey, parent, valueList...)
 }
 
-func (rec *Client) SetKeyFormat(parent *int, keyList ...interface{}) int {
-	if len(keyList) > 0 {
-		return rec.Elem.SetData(DataModeKeyFormat, parent, keyList...)
-	} else {
-		return rec.Elem.SetData(DataModeKey, parent, nil)
-	}
-}
-
-func (rec *Client) SetKeyAuto(parent *int, key interface{}, value interface{}) {
+func (rec *Client) SetKeyAuto(parent *int, key interface{}, valueList ...interface{}) {
 	index := rec.Elem.SetData(DataModeKey, parent, key)
-	_ = rec.Elem.SetData(DataModeAuto, &index, value)
+	_ = rec.Elem.SetData(DataModeAuto, &index, valueList...)
 }
 
-func (rec *Client) SetKeyString(parent *int, key interface{}, value interface{}) {
+func (rec *Client) SetKeyString(parent *int, key interface{}, valueList ...interface{}) {
 	index := rec.Elem.SetData(DataModeKey, parent, key)
-	_ = rec.Elem.SetData(DataModeString, &index, value)
+	_ = rec.Elem.SetData(DataModeString, &index, valueList...)
 }
 
-func (rec *Client) SetKeyValue(parent *int, key interface{}, value interface{}) {
+func (rec *Client) SetKeyValue(parent *int, key interface{}, valueList ...interface{}) {
 	index := rec.Elem.SetData(DataModeKey, parent, key)
-	_ = rec.Elem.SetData(DataModeValue, &index, value)
+	_ = rec.Elem.SetData(DataModeValue, &index, valueList...)
 }
 
 func (rec *Client) SetKeyArray(parent *int, key interface{}) int {
@@ -141,32 +133,16 @@ func (rec *Client) SetKeyMap(parent *int, key interface{}) int {
 	return rec.Elem.SetData(DataModeMap, &index, nil)
 }
 
-func (rec *Client) SetAuto(parent *int, value interface{}) {
-	_ = rec.Elem.SetData(DataModeAuto, parent, value)
+func (rec *Client) SetAuto(parent *int, valueList ...interface{}) {
+	_ = rec.Elem.SetData(DataModeAuto, parent, valueList...)
 }
 
-func (rec *Client) SetString(parent *int, value interface{}) {
-	_ = rec.Elem.SetData(DataModeString, parent, value)
+func (rec *Client) SetString(parent *int, valueList ...interface{}) {
+	_ = rec.Elem.SetData(DataModeString, parent, valueList...)
 }
 
-func (rec *Client) SetStringFormat(parent *int, valueList ...interface{}) {
-	if len(valueList) > 0 {
-		_ = rec.Elem.SetData(DataModeStringFormat, parent, valueList...)
-	} else {
-		_ = rec.Elem.SetData(DataModeString, parent, nil)
-	}
-}
-
-func (rec *Client) SetValue(parent *int, value interface{}) {
-	_ = rec.Elem.SetData(DataModeValue, parent, value)
-}
-
-func (rec *Client) SetValueFormat(parent *int, valueList ...interface{}) {
-	if len(valueList) > 0 {
-		_ = rec.Elem.SetData(DataModeValueFormat, parent, valueList...)
-	} else {
-		_ = rec.Elem.SetData(DataModeValue, parent, nil)
-	}
+func (rec *Client) SetValue(parent *int, valueList ...interface{}) {
+	_ = rec.Elem.SetData(DataModeValue, parent, valueList...)
 }
 
 func (rec *Client) SetArray(parent *int) int {
@@ -177,21 +153,41 @@ func (rec *Client) SetMap(parent *int) int {
 	return rec.Elem.SetData(DataModeMap, parent, nil)
 }
 
-func (rec *Client) A(value interface{}) string {
-	any := rec.GetAny(value)
+func (rec *Client) A(valueList ...interface{}) string {
+	anyList := rec.GetAnyList(valueList...)
 
-	str := "null"
-	if any != nil {
-		str = fmt.Sprintf("%v", any)
-		str = rec.Config.JsonEncode.Replace(str)
-		switch any.(type) {
-		case
-			bool,
-			complex64, complex128,
-			float32, float64,
-			int, int8, int16, int32, int64,
-			uint, uint8, uint16, uint32, uint64:
-		default:
+	var str string
+	var strList []string
+	flg := true
+	for _, val := range anyList {
+		str := "null"
+		if val != nil {
+			flg = false
+			str = fmt.Sprintf("%v", val)
+			str = rec.Config.JsonEncode.Replace(str)
+		}
+		strList = append(strList, str)
+	}
+	if flg {
+		str = "null"
+	} else {
+		strFlg := true
+		if len(anyList) == 1 {
+			any := anyList[0]
+			if any != nil {
+				switch any.(type) {
+				case
+					bool,
+					complex64, complex128,
+					float32, float64,
+					int, int8, int16, int32, int64,
+					uint, uint8, uint16, uint32, uint64:
+					strFlg = false
+				}
+			}
+		}
+		str = strings.Join(strList, "")
+		if strFlg {
 			str = fmt.Sprintf("\"%v\"", str)
 		}
 	}
@@ -199,13 +195,25 @@ func (rec *Client) A(value interface{}) string {
 	return str
 }
 
-func (rec *Client) S(value interface{}) string {
-	any := rec.GetAny(value)
+func (rec *Client) S(valueList ...interface{}) string {
+	anyList := rec.GetAnyList(valueList...)
 
-	str := "null"
-	if any != nil {
-		str = fmt.Sprintf("%v", any)
-		str = rec.Config.JsonEncode.Replace(str)
+	var str string
+	var strList []string
+	flg := true
+	for _, val := range anyList {
+		str := "null"
+		if val != nil {
+			flg = false
+			str = fmt.Sprintf("%v", val)
+			str = rec.Config.JsonEncode.Replace(str)
+		}
+		strList = append(strList, str)
+	}
+	if flg {
+		str = "null"
+	} else {
+		str = strings.Join(strList, "")
 		str = fmt.Sprintf("\"%v\"", str)
 	}
 
@@ -213,10 +221,13 @@ func (rec *Client) S(value interface{}) string {
 }
 
 func (rec *Client) V(value interface{}) string {
-	any := rec.GetAny(value)
+	anyList := rec.GetAnyList(value)
+	any := anyList[0]
 
-	str := "null"
-	if any != nil {
+	var str string
+	if any == nil {
+		str = "null"
+	} else {
 		str = fmt.Sprintf("%v", any)
 		str = rec.Config.JsonEncode.Replace(str)
 	}
@@ -224,140 +235,145 @@ func (rec *Client) V(value interface{}) string {
 	return str
 }
 
-func (rec *Client) GetAny(value interface{}) interface{} {
-	var any interface{}
-	any = nil
+func (rec *Client) GetAnyList(valueList ...interface{}) []interface{} {
+	var anyList []interface{}
+	for _, value := range valueList {
+		var any interface{}
+		any = nil
 
-	switch value.(type) {
-	case *bool:
-		val := value.(*bool)
-		if val != nil {
-			any = *val
+		switch value.(type) {
+		case *bool:
+			val := value.(*bool)
+			if val != nil {
+				any = *val
+			}
+		case *complex64:
+			val := value.(*complex64)
+			if val != nil {
+				any = *val
+			}
+		case *complex128:
+			val := value.(*complex128)
+			if val != nil {
+				any = *val
+			}
+		case *float32:
+			val := value.(*float32)
+			if val != nil {
+				any = *val
+			}
+		case *float64:
+			val := value.(*float64)
+			if val != nil {
+				any = *val
+			}
+		case *int:
+			val := value.(*int)
+			if val != nil {
+				any = *val
+			}
+		case *int8:
+			val := value.(*int8)
+			if val != nil {
+				any = *val
+			}
+		case *int16:
+			val := value.(*int16)
+			if val != nil {
+				any = *val
+			}
+		case *int32:
+			val := value.(*int32)
+			if val != nil {
+				any = *val
+			}
+		case *int64:
+			val := value.(*int64)
+			if val != nil {
+				any = *val
+			}
+		case *uint:
+			val := value.(*uint)
+			if val != nil {
+				any = *val
+			}
+		case *uint8:
+			val := value.(*uint8)
+			if val != nil {
+				any = *val
+			}
+		case *uint16:
+			val := value.(*uint16)
+			if val != nil {
+				any = *val
+			}
+		case *uint32:
+			val := value.(*uint32)
+			if val != nil {
+				any = *val
+			}
+		case *uint64:
+			val := value.(*uint64)
+			if val != nil {
+				any = *val
+			}
+		case *string:
+			val := value.(*string)
+			if val != nil {
+				any = *val
+			}
+		case *time.Time:
+			val := value.(*time.Time)
+			if val != nil {
+				any = *val
+			}
+		case *NullBool:
+			val := value.(*NullBool)
+			if val.Valid {
+				v := val.Get()
+				any = *v
+			}
+		case *NullFloat64:
+			val := value.(*NullFloat64)
+			if val.Valid {
+				v := val.Get()
+				any = *v
+			}
+		case *NullInt32:
+			val := value.(*NullInt32)
+			if val.Valid {
+				v := val.Get()
+				any = *v
+			}
+		case *NullInt64:
+			val := value.(*NullInt64)
+			if val.Valid {
+				v := val.Get()
+				any = *v
+			}
+		case *NullString:
+			val := value.(*NullString)
+			if val.Valid {
+				v := val.Get()
+				any = *v
+			}
+		case *NullTime:
+			val := value.(*NullTime)
+			if val.Valid {
+				v := val.Get()
+				any = *v
+			}
+		default:
+			any = value
 		}
-	case *complex64:
-		val := value.(*complex64)
-		if val != nil {
-			any = *val
+
+		switch any.(type) {
+		case time.Time:
+			any = any.(time.Time).Format(rec.Config.TimeFormat)
 		}
-	case *complex128:
-		val := value.(*complex128)
-		if val != nil {
-			any = *val
-		}
-	case *float32:
-		val := value.(*float32)
-		if val != nil {
-			any = *val
-		}
-	case *float64:
-		val := value.(*float64)
-		if val != nil {
-			any = *val
-		}
-	case *int:
-		val := value.(*int)
-		if val != nil {
-			any = *val
-		}
-	case *int8:
-		val := value.(*int8)
-		if val != nil {
-			any = *val
-		}
-	case *int16:
-		val := value.(*int16)
-		if val != nil {
-			any = *val
-		}
-	case *int32:
-		val := value.(*int32)
-		if val != nil {
-			any = *val
-		}
-	case *int64:
-		val := value.(*int64)
-		if val != nil {
-			any = *val
-		}
-	case *uint:
-		val := value.(*uint)
-		if val != nil {
-			any = *val
-		}
-	case *uint8:
-		val := value.(*uint8)
-		if val != nil {
-			any = *val
-		}
-	case *uint16:
-		val := value.(*uint16)
-		if val != nil {
-			any = *val
-		}
-	case *uint32:
-		val := value.(*uint32)
-		if val != nil {
-			any = *val
-		}
-	case *uint64:
-		val := value.(*uint64)
-		if val != nil {
-			any = *val
-		}
-	case *string:
-		val := value.(*string)
-		if val != nil {
-			any = *val
-		}
-	case *time.Time:
-		val := value.(*time.Time)
-		if val != nil {
-			any = *val
-		}
-	case *NullBool:
-		val := value.(*NullBool)
-		if val.Valid {
-			v := val.Get()
-			any = *v
-		}
-	case *NullFloat64:
-		val := value.(*NullFloat64)
-		if val.Valid {
-			v := val.Get()
-			any = *v
-		}
-	case *NullInt32:
-		val := value.(*NullInt32)
-		if val.Valid {
-			v := val.Get()
-			any = *v
-		}
-	case *NullInt64:
-		val := value.(*NullInt64)
-		if val.Valid {
-			v := val.Get()
-			any = *v
-		}
-	case *NullString:
-		val := value.(*NullString)
-		if val.Valid {
-			v := val.Get()
-			any = *v
-		}
-	case *NullTime:
-		val := value.(*NullTime)
-		if val.Valid {
-			v := val.Get()
-			any = *v
-		}
-	default:
-		any = value
+
+		anyList = append(anyList, any)
 	}
 
-	switch any.(type) {
-	case time.Time:
-		any = any.(time.Time).Format(rec.Config.TimeFormat)
-	}
-
-	return any
+	return anyList
 }

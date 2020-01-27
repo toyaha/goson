@@ -348,74 +348,107 @@ func (rec *Build) SetData() error {
 		switch elementData.Mode {
 		case DataModeRoot:
 		case DataModeKey:
-			_, str, err := rec.setDataGetValue(anyList)
-			if err != nil {
-				return err
+			var str string
+			var strList []string
+			flg := true
+			for _, val := range anyList {
+				str := "null"
+				if val != nil {
+					flg = false
+					str = fmt.Sprintf("%v", val)
+					str = rec.JsonEncode.Replace(str)
+				}
+				strList = append(strList, str)
 			}
-			str = fmt.Sprintf("\"%v\"", str)
-			buildData.Value = str
-		case DataModeKeyFormat:
-			str, err := rec.setDataGetValueForFormat("\"%v\"", anyList)
-			if err != nil {
-				return err
+			if flg {
+				str = "null"
+			} else {
+				str = strings.Join(strList, "")
+				str = fmt.Sprintf("\"%v\"", str)
 			}
 			buildData.Value = str
 		case DataModeAuto:
-			any, str, err := rec.setDataGetValue(anyList)
-			if err != nil {
-				return err
+			var str string
+			var strList []string
+			flg := true
+			for _, val := range anyList {
+				str := "null"
+				if val != nil {
+					flg = false
+					str = fmt.Sprintf("%v", val)
+					str = rec.JsonEncode.Replace(str)
+				}
+				strList = append(strList, str)
 			}
-			if any != nil {
-				switch any.(type) {
-				case
-					bool,
-					complex64, complex128,
-					float32, float64,
-					int, int8, int16, int32, int64,
-					uint, uint8, uint16, uint32, uint64:
-				default:
+			if flg {
+				str = "null"
+			} else {
+				strFlg := true
+				if len(anyList) == 1 {
+					any := anyList[0]
+					if any != nil {
+						switch any.(type) {
+						case
+							bool,
+							complex64, complex128,
+							float32, float64,
+							int, int8, int16, int32, int64,
+							uint, uint8, uint16, uint32, uint64:
+							strFlg = false
+						}
+					}
+				}
+				str = strings.Join(strList, "")
+				if strFlg {
 					str = fmt.Sprintf("\"%v\"", str)
 				}
 			}
 			buildData.Value = str
 		case DataModeString:
-			any, str, err := rec.setDataGetValue(anyList)
-			if err != nil {
-				return err
+			var str string
+			var strList []string
+			flg := true
+			for _, val := range anyList {
+				str := "null"
+				if val != nil {
+					flg = false
+					str = fmt.Sprintf("%v", val)
+					str = rec.JsonEncode.Replace(str)
+				}
+				strList = append(strList, str)
 			}
-			if any != nil {
+			if flg {
+				str = "null"
+			} else {
+				str = strings.Join(strList, "")
 				str = fmt.Sprintf("\"%v\"", str)
 			}
 			buildData.Value = str
-		case DataModeStringFormat:
-			str, err := rec.setDataGetValueForFormat("\"%v\"", anyList)
-			if err != nil {
-				return err
-			}
-			buildData.Value = str
 		case DataModeValue:
-			_, str, err := rec.setDataGetValue(anyList)
-			if err != nil {
-				return err
+			if anyList == nil || len(anyList) != 1 {
+				return errors.New("when the value, the length must be 1")
 			}
-			buildData.Value = str
-		case DataModeValueFormat:
-			str, err := rec.setDataGetValueForFormat("%v", anyList)
-			if err != nil {
-				return err
+
+			any := anyList[0]
+			var str string
+			if any == nil {
+				str = "null"
+			} else {
+				str = fmt.Sprintf("%v", any)
+				str = rec.JsonEncode.Replace(str)
 			}
 			buildData.Value = str
 		case DataModeArray:
 			for _, child := range buildData.ChildList {
 				switch rec.Elem.DataList[child].Mode {
-				case DataModeKey, DataModeKeyFormat:
+				case DataModeKey:
 					return errors.New("keys cannot be given to children of array")
 				}
 			}
 		case DataModeMap:
 			for _, child := range buildData.ChildList {
 				switch rec.Elem.DataList[child].Mode {
-				case DataModeKey, DataModeKeyFormat:
+				case DataModeKey:
 				default:
 					return errors.New("the child of map must be key")
 				}
@@ -434,10 +467,6 @@ func (rec *Build) setDataGetValue(anyList []interface{}) (interface{}, string, e
 	var any interface{}
 	var str string
 
-	if len(anyList) != 1 {
-		return any, str, errors.New("value length")
-	}
-
 	if anyList[0] != nil {
 		any = anyList[0]
 		str = fmt.Sprintf("%v", any)
@@ -448,22 +477,6 @@ func (rec *Build) setDataGetValue(anyList []interface{}) (interface{}, string, e
 	}
 
 	return any, str, nil
-}
-
-func (rec *Build) setDataGetValueForFormat(format string, anyList []interface{}) (string, error) {
-	if len(anyList) > 0 {
-		return "", errors.New("value length")
-	}
-
-	str := fmt.Sprintf("%v", anyList[0])
-	if len(anyList) > 1 {
-		valueList := anyList[1:]
-		str = fmt.Sprintf(str, valueList...)
-		str = rec.JsonEncode.Replace(str)
-	}
-	str = fmt.Sprintf(format, str)
-
-	return str, nil
 }
 
 func (rec *Build) BuildRe(index int) (*string, error) {
@@ -478,7 +491,7 @@ func (rec *Build) BuildRe(index int) (*string, error) {
 		for _, child := range data.ChildList {
 			childData := rec.DataList[child]
 			switch childData.Mode {
-			case DataModeKey, DataModeKeyFormat:
+			case DataModeKey:
 				if _, ok := keyMap[childData.Value]; ok {
 					return nil, errors.New("key duplication prohibition")
 				}
@@ -499,7 +512,7 @@ func (rec *Build) BuildRe(index int) (*string, error) {
 		}
 		str := strings.Join(strList, ",")
 		response = fmt.Sprintf("{%v}", str)
-	case DataModeKey, DataModeKeyFormat:
+	case DataModeKey:
 		str := fmt.Sprintf("%v:", data.Value)
 		for _, child := range data.ChildList {
 			res, err := rec.BuildRe(child)
@@ -509,7 +522,7 @@ func (rec *Build) BuildRe(index int) (*string, error) {
 			str = fmt.Sprintf("%v%v", str, *res)
 		}
 		response = str
-	case DataModeAuto, DataModeString, DataModeStringFormat, DataModeValue, DataModeValueFormat:
+	case DataModeAuto, DataModeString, DataModeValue:
 		response = data.Value
 	case DataModeArray:
 		var strList []string
